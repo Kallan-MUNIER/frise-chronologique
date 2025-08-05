@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Frise Chronologique - CSV & Excel (dd/mm/yyyy)</title>
+  <title>Frise Chronologique avec Type (I/E)</title>
   <script src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <link href="https://unpkg.com/vis-timeline/styles/vis-timeline-graph2d.min.css" rel="stylesheet" />
@@ -32,16 +32,27 @@
       margin-top: 20px;
       color: red;
     }
+    /* Couleurs par type */
+    .interne {
+      background-color: #2a9df4 !important;
+      color: white !important;
+      border-color: #1a7dd6 !important;
+    }
+    .externe {
+      background-color: #f4a52a !important;
+      color: white !important;
+      border-color: #d67d1a !important;
+    }
   </style>
 </head>
 <body>
-  <h1>📅 Frise Chronologique - CSV ou Excel (date au format dd/mm/yyyy)</h1>
+  <h1>📅 Frise Chronologique avec Type (I=Interne, E=Externe)</h1>
 
   <div id="timeline"></div>
 
   <div id="dropzone">
     👉 Glisse un fichier <strong>.csv</strong> ou <strong>.xlsx</strong> ici<br />
-    <small>Format : <code>date,événement</code> avec date au format <em>jj/mm/aaaa</em></small>
+    <small>Format : <code>date,événement,type (I/E)</code> avec date au format <em>jj/mm/aaaa</em></small>
   </div>
 
   <div id="message"></div>
@@ -60,13 +71,12 @@
       message.textContent = '';
     }
 
-    // Convertit "dd/mm/yyyy" en objet Date
     function parseFrenchDate(dateStr) {
       if (typeof dateStr !== 'string') return null;
       const parts = dateStr.split('/');
       if (parts.length !== 3) return null;
       const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1; // Mois 0-based
+      const month = parseInt(parts[1], 10) - 1;
       const year = parseInt(parts[2], 10);
       const date = new Date(year, month, day);
       if (isNaN(date)) return null;
@@ -92,39 +102,39 @@
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
-        if (!row || row.length < 2) continue;
+        if (!row || row.length < 3) continue; // on attend au moins 3 colonnes
 
         const rawDate = row[0];
         const content = row[1];
+        const type = (row[2] || '').toString().trim().toUpperCase();
 
-        // Ignore l'en-tête
         if (i === 0 && (rawDate.toString().toLowerCase() === 'date' || content.toString().toLowerCase() === 'titre')) {
-          continue;
+          continue; // ignore header
         }
 
-        // Gère date Excel numérique (via SheetJS)
         let dateObj;
         if (typeof rawDate === 'number') {
-          dateObj = XLSX.SSF.parse_date_code(rawDate);
-          if (dateObj) {
-            dateObj = new Date(dateObj.y, dateObj.m - 1, dateObj.d);
-          }
+          const d = XLSX.SSF.parse_date_code(rawDate);
+          if (d) dateObj = new Date(d.y, d.m - 1, d.d);
         } else {
-          // Parse la date au format dd/mm/yyyy (string)
           dateObj = parseFrenchDate(rawDate);
         }
-
         if (!dateObj || isNaN(dateObj.getTime())) continue;
 
         const isoDate = dateObj.toISOString().split('T')[0];
 
+        // Définir la classe CSS selon le type
+        let className = '';
+        if (type === 'I') className = 'interne';
+        else if (type === 'E') className = 'externe';
+
         events.push({
           id: events.length + 1,
           content: content.toString().trim(),
-          start: isoDate
+          start: isoDate,
+          className: className
         });
       }
-
       return events;
     }
 
