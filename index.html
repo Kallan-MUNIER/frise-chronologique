@@ -34,14 +34,29 @@
     }
     /* Couleurs par type */
     .interne {
-      background-color: #2a9df4 !important;
+      background-color: #449ce4 !important;
       color: white !important;
-      border-color: #1a7dd6 !important;
+      border-color: #449ce4 !important;
     }
     .externe {
-      background-color: #f4a52a !important;
+      background-color: #2b3e6c !important;
       color: white !important;
-      border-color: #d67d1a !important;
+      border-color: #2b3e6c !important;
+    }
+    .demus {
+      background-color: #983e4c !important;
+      color: white !important;
+      border-color: #983e4c !important;
+    }
+    .parlons_transfo {
+      background-color: #f1d9e6 !important;
+      color: white !important;
+      border-color: #f1d9e6 !important;
+    }
+    .projet {
+      background-color: #c8b359 !important;
+      color: white !important;
+      border-color: #c8b359 !important;
     }
   </style>
 </head>
@@ -127,6 +142,9 @@
         let className = '';
         if (type === 'I') className = 'interne';
         else if (type === 'E') className = 'externe';
+        else if (type === 'D') className = 'demus';
+        else if (type === 'PT') className = 'parlons_transfo';
+        else if (type === 'P') className = 'projet';
 
         events.push({
           id: events.length + 1,
@@ -194,4 +212,5 @@
   </script>
 </body>
 </html>
+
 
